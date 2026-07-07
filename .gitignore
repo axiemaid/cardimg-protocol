@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Runtime data
+ledger.json
+images/
+
+# Test files
+test*.png
+test*.html
+
+# PM2 ecosystem
+ecosystem.config.js

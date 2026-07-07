@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CARDIMG Registry Viewer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      padding: 20px;
+    }
+    h1 { font-size: 24px; margin-bottom: 20px; color: #fff; }
+    h2 { font-size: 18px; margin: 20px 0 10px; color: #aaa; }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .stat-box {
+      background: #1a1a1a;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #333;
+    }
+    .stat-label { color: #666; font-size: 12px; }
+    .stat-value { color: #fff; font-size: 24px; font-weight: bold; }
+    
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: #1a1a1a;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #333;
+    }
+    
+    .card-image {
+      width: 100%;
+      height: 200px;
+      object-fit: contain;
+      background: #0a0a0a;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .card-image.loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 12px;
+    }
+    .card-image.error {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f44;
+      font-size: 12px;
+    }
+    
+    .card-hash {
+      font-size: 12px;
+      color: #4a9eff;
+      word-break: break-all;
+      margin-bottom: 10px;
+    }
+    .card-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .meta-key { color: #666; }
+    .meta-value { color: #ccc; }
+    .card-link {
+      display: inline-block;
+      margin-top: 10px;
+      color: #4a9eff;
+      font-size: 12px;
+    }
+    
+    .loading { color: #666; text-align: center; padding: 40px; }
+    .error { color: #f44; background: #2a1a1a; padding: 15px; border-radius: 8px; }
+    .empty { color: #666; text-align: center; padding: 40px; }
+    
+    .refresh-btn {
+      background: #333;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    .refresh-btn:hover { background: #444; }
+    
+    .upload-section {
+      background: #1a1a1a;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      margin-bottom: 20px;
+    }
+    .upload-section h2 {
+      margin: 0 0 15px;
+    }
+    #upload-form {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    #file-input {
+      flex: 1;
+      padding: 8px;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+    }
+    .upload-btn {
+      background: #4a9eff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .upload-btn:hover { background: #3a8eef; }
+    .upload-btn:disabled { background: #666; cursor: not-allowed; }
+    #upload-result {
+      margin-top: 10px;
+      font-size: 13px;
+    }
+    #upload-result.success { color: #4f8; }
+    #upload-result.error { color: #f44; }
+  </style>
+</head>
+<body>
+  <h1>CARDIMG Registry</h1>
+  
+  <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+  
+  <div class="upload-section">
+    <h2>Upload New Card</h2>
+    <form id="upload-form" onsubmit="uploadCard(event)">
+      <input type="file" id="file-input" accept="image/*" required>
+      <button type="submit" class="upload-btn">Upload to Chain</button>
+    </form>
+    <div id="upload-result"></div>
+  </div>
+  
+  <h2>Statistics</h2>
+  <div id="stats" class="stats"></div>
+  
+  <h2>Registered Cards</h2>
+  <div id="cards" class="cards"></div>
+  
+  <script>
+    const API_URL = 'http://localhost:3012'
+    
+    async function fetchAPI(endpoint) {
+      const res = await fetch(`${API_URL}${endpoint}`)
+      if (!res.ok) throw new Error(`API error: ${res.status}`)
+      return res.json()
+    }
+    
+    async function loadData() {
+      const statsEl = document.getElementById('stats')
+      const cardsEl = document.getElementById('cards')
+      
+      statsEl.innerHTML = '<div class="loading">Loading...</div>'
+      cardsEl.innerHTML = '<div class="loading">Loading...</div>'
+      
+      try {
+        // Fetch stats and cards
+        const stats = await fetchAPI('/stats')
+        const cardsData = await fetchAPI('/cards')
+        
+        // Render stats
+        statsEl.innerHTML = `
+          <div class="stat-box">
+            <div class="stat-label">Total Cards</div>
+            <div class="stat-value">${stats.total || 0}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Total Bytes</div>
+            <div class="stat-value">${formatBytes(stats.totalBytes || 0)}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Avg Size</div>
+            <div class="stat-value">${formatBytes(stats.avgSize || 0)}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Last Block</div>
+            <div class="stat-value">${stats.lastBlock || 0}</div>
+          </div>
+        `
+        
+        // Render cards
+        if (cardsData.cards.length === 0) {
+          cardsEl.innerHTML = '<div class="empty">No cards registered yet</div>'
+        } else {
+          cardsEl.innerHTML = cardsData.cards.map(card => `
+            <div class="card" id="card-${card.hash}">
+              <div class="card-image loading" id="img-${card.hash}">Loading image...</div>
+              <div class="card-hash">${card.hash}</div>
+              <div class="card-meta">
+                <div><span class="meta-key">Format:</span> <span class="meta-value">${card.format}</span></div>
+                <div><span class="meta-key">Size:</span> <span class="meta-value">${formatBytes(card.size)}</span></div>
+                <div><span class="meta-key">Block:</span> <span class="meta-value">${card.blockHeight || 'pending'}</span></div>
+                <div><span class="meta-key">Indexed:</span> <span class="meta-value">${formatTime(card.indexed)}</span></div>
+              </div>
+              <a class="card-link" href="https://whatsonchain.com/tx/${card.txid}" target="_blank">View on WoC →</a>
+            </div>
+          `).join('')
+          
+          // Load images
+          cardsData.cards.forEach(card => loadImage(card.hash))
+        }
+        
+      } catch (e) {
+        statsEl.innerHTML = `<div class="error">Error: ${e.message}</div>`
+        cardsEl.innerHTML = `<div class="error">Could not load cards</div>`
+      }
+    }
+    
+    async function loadImage(hash) {
+      const imgEl = document.getElementById(`img-${hash}`)
+      
+      try {
+        // Create image element
+        const img = document.createElement('img')
+        img.className = 'card-image'
+        img.src = `${API_URL}/cards/${hash}/image`
+        img.alt = `Card ${hash}`
+        
+        img.onload = () => {
+          imgEl.className = 'card-image'
+          imgEl.innerHTML = ''
+          imgEl.appendChild(img)
+        }
+        
+        img.onerror = () => {
+          imgEl.className = 'card-image error'
+          imgEl.innerHTML = 'Failed to load'
+        }
+        
+      } catch (e) {
+        imgEl.className = 'card-image error'
+        imgEl.innerHTML = `Error: ${e.message}`
+      }
+    }
+    
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B'
+      const k = 1024
+      const sizes = ['B', 'KB', 'MB', 'GB']
+      const i = Math.floor(Math.log(bytes) / Math.log(k))
+      return Math.round(bytes / Math.pow(k, i)) + ' ' + sizes[i]
+    }
+    
+    function formatTime(dateStr) {
+      if (!dateStr) return 'unknown'
+      const d = new Date(dateStr)
+      return d.toLocaleTimeString()
+    }
+    
+    // Load on page load
+    loadData()
+    
+    // Auto-refresh every 30s
+    setInterval(loadData, 30000)
+    
+    // Upload function
+    async function uploadCard(e) {
+      e.preventDefault()
+      
+      const fileInput = document.getElementById('file-input')
+      const resultEl = document.getElementById('upload-result')
+      const uploadBtn = document.querySelector('.upload-btn')
+      
+      if (!fileInput.files[0]) {
+        resultEl.className = 'error'
+        resultEl.textContent = 'Please select a file'
+        return
+      }
+      
+      const file = fileInput.files[0]
+      
+      // Check size (10MB max)
+      if (file.size > 10000000) {
+        resultEl.className = 'error'
+        resultEl.textContent = `File too large: ${(file.size / 1024 / 1024).toFixed(1)}MB (max 10MB)`
+        return
+      }
+      
+      uploadBtn.disabled = true
+      uploadBtn.textContent = 'Uploading...'
+      resultEl.className = ''
+      resultEl.textContent = 'Uploading to blockchain...'
+      
+      try {
+        const formData = new FormData()
+        formData.append('image', file)
+        
+        const res = await fetch(`${API_URL}/upload`, {
+          method: 'POST',
+          body: formData
+        })
+        
+        const data = await res.json()
+        
+        if (!res.ok) {
+          throw new Error(data.error || `HTTP ${res.status}`)
+        }
+        
+        resultEl.className = 'success'
+        resultEl.innerHTML = `
+          ✓ Uploaded successfully!<br>
+          TXID: <a href="${data.explorer}" target="_blank">${data.txid}</a><br>
+          Hash: ${data.hash}<br>
+          Size: ${formatBytes(data.size)}
+        `
+        
+        // Clear form
+        fileInput.value = ''
+        
+        // Refresh cards after 10s (wait for indexer)
+        setTimeout(loadData, 10000)
+        
+      } catch (err) {
+        resultEl.className = 'error'
+        resultEl.textContent = `Error: ${err.message}`
+      }
+      
+      uploadBtn.disabled = false
+      uploadBtn.textContent = 'Upload to Chain'
+    }
+  </script>
+</body>
+</html>
