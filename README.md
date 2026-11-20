@@ -10,9 +10,8 @@ OP_FALSE OP_RETURN "CARDIMG" <image_data>
 
 No version byte. No metadata. No chunking. Just image bytes.
 
-- **Identity:** SHA256 of the image data
 - **Permissionless:** Anyone can upload or index
-- **All meaning is application-layer:** Card ID, condition, price, ownership — none in the protocol
+- **All meaning is application-layer:** Card ID, identity, condition, price, ownership — none in the protocol
 
 ## CARDSET (Companion Protocol)
 
