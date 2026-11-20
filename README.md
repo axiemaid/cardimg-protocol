@@ -34,14 +34,9 @@ The first txid (cardimg_txid_1) is the front image of the card, the second (card
 
 | Module | Purpose |
 |--------|---------|
-| [cardimg-upload](https://github.com/axiemaid/cardimg-upload) | Upload card scans on-chain |
-| [cardimg-bind](https://github.com/axiemaid/cardimg-bind) | Create CARDSET transactions |
-| [cardimg-indexer](https://github.com/axiemaid/cardimg-indexer) | Index all CARDIMG/CARDSET txs |
-| [cardimg-api](https://github.com/axiemaid/cardimg-api) | HTTP API for indexed data |
-| [cardimg-scan](https://github.com/axiemaid/cardimg-scan) | Scan validation (DPI, edges, background) |
-| [cardimg-viewer](https://github.com/axiemaid/cardimg-viewer) | Web gallery for browsing cards |
+| [cardimg-portal](https://github.com/axiemaid/cardimg-portal) | Explorer + Uploader — browse and upload card images on-chain |
 
-Each is independent. The chain is the glue.
+The chain is the glue.
 
 ## License
 
