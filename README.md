@@ -30,10 +30,6 @@ OP_FALSE OP_RETURN "CARDSET" <cardimg_txid_1> <cardimg_txid_2> ...
 
 Ordering convention: pos 0 = front, pos 1 = back, pos 2+ = supplementary. Not enforced by protocol.
 
-## Cost
-
-0.1 sats/byte, calculated from actual serialized transaction size.
-
 ## Ecosystem
 
 | Module | Purpose |
