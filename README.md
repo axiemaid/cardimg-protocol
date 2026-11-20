@@ -2,7 +2,7 @@
 
 Onchain card image registry for BSV.
 
-## Protocol
+## Transaction Structure
 
 ```
 OP_FALSE OP_RETURN "CARDIMG" <image_data>
@@ -15,7 +15,7 @@ OP_FALSE OP_RETURN "CARDIMG" <image_data>
 
 Anyone can upload. Anyone can index. The protocol stores image data only — no metadata, no identity, no version byte. All meaning (card ID, condition, ownership, etc.) is application-layer.
 
-## CARDSET (Companion Protocol)
+## CARDSET Transaction Structure
 
 Links CARDIMG txids together as different images of the same card:
 
