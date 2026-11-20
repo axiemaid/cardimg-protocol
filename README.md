@@ -1,68 +1,46 @@
 # CARDIMG Protocol
 
-Permissionless onchain card image registry for BSV blockchain.
+Minimal onchain card image registry for BSV.
 
 ## Protocol
 
-Minimal, image-only format:
-
 ```
-OP_FALSE OP_RETURN "CARDIMG" <version:1B> <image_data>
+OP_FALSE OP_RETURN "CARDIMG" <image_data>
 ```
 
-- **No metadata** on-chain — identity derived from image hash (SHA256)
-- **Permissionless** — anyone can upload/read
-- All meaning (condition, price, ownership) emerges from applications reading the data
+No version byte. No metadata. No chunking. Just image bytes.
 
-## Components
+- **Identity:** SHA256 of the image data
+- **Permissionless:** Anyone can upload or index
+- **All meaning is application-layer:** Card ID, condition, price, ownership — none in the protocol
 
-| File | Purpose |
-|------|---------|
-| `SPEC.md` | Protocol specification |
-| `upload.cjs` | CLI uploader |
-| `indexer.cjs` | Jungle Bus indexer |
-| `api.cjs` | REST API (port 3012) |
-| `viewer.html` | Web viewer |
-| `viewer-server.cjs` | Viewer HTTP server (port 3013) |
+## CARDSET (Companion Protocol)
 
-## Quick Start
+Links CARDIMG txids together as a set (front, back, angles):
 
-```bash
-# Install dependencies
-npm install
-
-# Start services (PM2)
-pm2 start ecosystem.config.js
-
-# Upload image via CLI
-node upload.cjs card-image.png
-
-# Upload via web
-open http://localhost:3013
+```
+OP_FALSE OP_RETURN "CARDSET" <cardimg_txid_1> <cardimg_txid_2> ...
 ```
 
-## API Endpoints
-
-| Endpoint | Description |
-|----------|-------------|
-| `GET /cards` | List all cards |
-| `GET /cards/:hash` | Get card metadata |
-| `GET /cards/:hash/image` | Get card image |
-| `POST /upload` | Upload new card (multipart) |
-| `GET /stats` | Population stats |
-| `GET /status` | Indexer status |
+Txid-based references — universally resolvable from cold start. Positional ordering by convention (pos 0 = front, pos 1 = back, pos 2+ = supplementary). Not enforced.
 
 ## Cost
 
-Approximately $0.04-0.20 per card depending on image size (~0.5 sats/byte).
-10MB max upload ≈ $2.00.
+0.1 sats/byte, calculated from actual serialized transaction size.
 
-## Requirements
+## Ecosystem
 
-- Node.js 18+
-- BSV wallet (funded)
-- Jungle Bus subscription for indexing
+| Module | Purpose |
+|--------|---------|
+| [cardimg-upload](https://github.com/axiemaid/cardimg-upload) | Upload card scans on-chain |
+| [cardimg-bind](https://github.com/axiemaid/cardimg-bind) | Create CARDSET transactions |
+| [cardimg-indexer](https://github.com/axiemaid/cardimg-indexer) | Index all CARDIMG/CARDSET txs |
+| [cardimg-api](https://github.com/axiemaid/cardimg-api) | HTTP API for indexed data |
+| [cardimg-scan](https://github.com/axiemaid/cardimg-scan) | Scan validation (DPI, edges, background) |
+| [cardimg-viewer](https://github.com/axiemaid/cardimg-viewer) | Web gallery for browsing cards |
+
+Each is independent. The chain is the glue.
 
 ## License
 
-MIT
+Public domain. Use freely.
