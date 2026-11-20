@@ -23,6 +23,8 @@ Links CARDIMG txids together as different images of the same card:
 OP_FALSE OP_RETURN "CARDSET" <cardimg_txid_1> <cardimg_txid_2> ...
 ```
 
+- `OP_FALSE` — Makes the output unspendable
+- `OP_RETURN` — Allows data in the output
 - `"CARDSET"` — Protocol identifier (7 bytes ASCII)
 - `<cardimg_txid_n>` — Transaction ID of a CARDIMG tx (32 bytes each)
 
