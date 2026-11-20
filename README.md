@@ -17,7 +17,7 @@ Anyone can upload. Anyone can index. The protocol stores image data only — no 
 
 ## CARDSET Transaction Structure
 
-Links CARDIMG txids together as different images of the same card:
+CARDSET transactions link CARDIMG txids together as different images of the same card:
 
 ```
 OP_FALSE OP_RETURN "CARDSET" <cardimg_txid_1> <cardimg_txid_2> ...
