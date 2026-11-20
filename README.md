@@ -28,7 +28,7 @@ OP_FALSE OP_RETURN "CARDSET" <cardimg_txid_1> <cardimg_txid_2> ...
 - `"CARDSET"` — Protocol identifier (7 bytes ASCII)
 - `<cardimg_txid_n>` — Transaction ID of a CARDIMG tx (32 bytes each)
 
-The first txid (cardimg_txid_1) is the front card image, the second (cardimg_txid_2) is the back image of the same card, and any additional txids are supplementary angles. This is convention only — not enforced by protocol.
+The first txid (cardimg_txid_1) is the front image of the card, the second (cardimg_txid_2) is the back image of the same card, and any additional txids are supplementary angles of the card. This is convention only — not enforced by protocol.
 
 ## Ecosystem
 
