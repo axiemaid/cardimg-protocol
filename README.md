@@ -2,7 +2,7 @@
 
 Onchain card image registry for BSV.
 
-## Transaction Structure
+## CARDIMG Transaction Structure
 
 ```
 OP_FALSE OP_RETURN "CARDIMG" <image_data>
